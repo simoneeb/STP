@@ -384,10 +384,12 @@ for cell in tqdm(range(nb_cells)):
     fig.savefig(f'{fpout}/plots/components/components_{key}.png')
     plt.close()
     
+    
     unit = temp_to_unit(key)
     
+    
     try:
-        fp = f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/{experiment_name}/results'
+        fp = f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/{exp_name}/results'
         fpkey = f'{fp}/spiketimes/{unit}_trials.json'
         
         with open(fpkey, 'r', encoding='utf-8') as handle:
