@@ -389,7 +389,7 @@ for cell in tqdm(range(nb_cells)):
         ax[1].set_xlabel('time [s]')
     
         #plt.show()
-        fig.savefig(f'{fpout}/plots/components/components_{key}.png')
+        fig.savefig(f'{fpout}/plots/components_v2/components_{key}.png')
         plt.close()
         
         
@@ -407,7 +407,7 @@ for cell in tqdm(range(nb_cells)):
    
 
 
-with open(f'{fpout}/sta_data.pkl', "wb") as handle:   #Pickling
+with open(f'{fpout}/sta_data_v2.pkl', "wb") as handle:   #Pickling
     pickle.dump(data, handle,protocol=pickle.HIGHEST_PROTOCOL )
 
 

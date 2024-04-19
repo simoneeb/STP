@@ -278,7 +278,6 @@ def temp_to_unit(key):
 
 
 
-
 # load stimulus
 experiment_name = 'MR-0609'
 fpstim  = f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/stimuli/{experiment_name}_checker/checkerboard_nd4_stim.mat'
@@ -293,10 +292,11 @@ for i in range(int(nb_frames/2)):
     frame = stim[stim['stim'][i][0]][()]
     stimmat[i,:,:] = frame
 
-#stimmat2 = np.rot90(np.fliplr(stimmat))
+
+# stimmat2 = np.rot90(np.fliplr(stimmat))
 stimmat = np.rot90(np.fliplr(stimmat), axes=(1,2),k = 3)
 
-# load  binned spikes
+# load binned spikes
 fpspikes = f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/STA/{experiment_name}/spikes_count_checkerboard_nd4.txt'
 spikes = np.loadtxt(fpspikes)
 nb_bins = spikes.shape[1]
@@ -319,99 +319,95 @@ data = {}
 for cell in tqdm(range(nb_cells)):
     #cell = 9
     key = f'temp_{cell}'
-    spike_count = spikes[cell,:]
-    nb_spks = np.sum(spike_count)
-
-    sta = sta = np.zeros((temporal_dimension,nb_checks,nb_checks))
-
-    # if repetition == 0:
-    for frame in range(temporal_dimension,nb_bins):
-        clip = stimmat[frame-temporal_dimension:frame,:,:] # why plus 1 ??
-        sta += spike_count[frame]*clip  # Add the minus sign because the stimulus is reversed on the DMD TODO change
-    #else:
-        #   for frame in range(nb_frames_by_repetition):
-        #      sequence_offset = 600+repetition*nb_frames_by_repetition
-        #     clip = checkerboard_24checks_120000frames[sequence_offset+frame-temporal_dimension+1:sequence_offset+frame+1,:,:]
-        #    sta += binned_spikes[repetition,frame]*clip
-            #   cumulated_spikes += binned_spikes[repetition,frame]
-    if nb_spks > 0:
-        sta = sta/nb_spks
-
-    #sta = np.flip(sta,axis = 0)
-    time_rf, space_rf = separate_components(sta) 
-
-    #time_rf = np.flip(time_rf)
-    pol = evaluate_polarity(sta)
-    # TODO get frame by frame temporal STA
-
-
-
-
-    # plot and save output
-    fpout =f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/STA/{experiment_name}'
-
-
-    fig,ax = plt.subplots(1,temporal_dimension, figsize = (20,5))
-    fig.subplots_adjust(wspace=1)
-    rf_pol = evaluate_polarity(sta)
-
-
-    for i in range(temporal_dimension):
-        ax[i].imshow(sta[i,:,:])
-        ax[i].set_title(f't = -{(temporal_dimension-1-i)*dt:.2f}')
-        ax[i].set_xlabel('x')
-    ax[0].set_xlabel('y')
-
-    #plt.show()
-    fig.suptitle(f' STA frames {key}, polarity {pol}')
-    fig.savefig(f'{fpout}/plots/full/full_{key}.png')
-    plt.close()
-
-    fig, ax = plt.subplots(1,2, figsize = (10,5))
-    ax[0].imshow(space_rf)
-    ax[1].plot(ftime,time_rf)
-    ax[0].set_title('spatial')
-    ax[1].set_title('temporal')
-    ax[1].set_box_aspect(1)
-    ax[0].set_xlabel('x')
-    ax[0].set_ylabel('y')
-
-    fig.suptitle(f' STA components {key}, polarity {pol}')
-
-    ax[1].set_xlabel('time [s]')
-
-    #plt.show()
-    fig.savefig(f'{fpout}/plots/components/components_{key}.png')
-    plt.close()
-    
-    
     unit = temp_to_unit(key)
-    
+
     
     try:
-        fp = f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/{exp_name}/results'
+        fp = f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/{experiment_name}/results'
         fpkey = f'{fp}/spiketimes/{unit}_trials.json'
         
         with open(fpkey, 'r', encoding='utf-8') as handle:
             raster = json.load(handle)
           
+        spike_count = spikes[cell,:]
+        nb_spks = np.sum(spike_count)
+    
+        sta = sta = np.zeros((temporal_dimension,nb_checks,nb_checks))
+    
+        # if repetition == 0:
+        for frame in range(temporal_dimension,nb_bins):
+            clip = stimmat[frame-temporal_dimension:frame,:,:] # why plus 1 ??
+            sta += spike_count[frame]*clip  # Add the minus sign because the stimulus is reversed on the DMD TODO change
+        #else:
+            #   for frame in range(nb_frames_by_repetition):
+            #      sequence_offset = 600+repetition*nb_frames_by_repetition
+            #     clip = checkerboard_24checks_120000frames[sequence_offset+frame-temporal_dimension+1:sequence_offset+frame+1,:,:]
+            #    sta += binned_spikes[repetition,frame]*clip
+                #   cumulated_spikes += binned_spikes[repetition,frame]
+        if nb_spks > 0:
+            sta = sta/nb_spks
+    
+        #sta = np.flip(sta,axis = 0)
+        time_rf, space_rf = separate_components(sta) 
+    
+        #time_rf = np.flip(time_rf)
+        pol = evaluate_polarity(sta)
+        # TODO get frame by frame temporal STA
+  
+    
+        # plot and save output
+        fpout =f'/Users/simone/Documents/Experiments/Spatiotemporal_tuning_curves/STA/{experiment_name}'
+        
+    
+        fig,ax = plt.subplots(1,temporal_dimension, figsize = (20,5))
+        fig.subplots_adjust(wspace=1)
+        rf_pol = evaluate_polarity(sta)
+    
+    
+        for i in range(temporal_dimension):
+            ax[i].imshow(sta[i,:,:])
+            ax[i].set_title(f't = -{(temporal_dimension-1-i)*dt:.2f}')
+            ax[i].set_xlabel('x')
+        ax[0].set_xlabel('y')
+    
+        #plt.show()
+        fig.suptitle(f' STA frames {key}, polarity {pol}')
+        fig.savefig(f'{fpout}/plots/full/full_{key}.png')
+        plt.close()
+    
+        fig, ax = plt.subplots(1,2, figsize = (10,5))
+        ax[0].imshow(space_rf)
+        ax[1].plot(ftime,time_rf)
+        ax[0].set_title('spatial')
+        ax[1].set_title('temporal')
+        ax[1].set_box_aspect(1)
+        ax[0].set_xlabel('x')
+        ax[0].set_ylabel('y')
+    
+        fig.suptitle(f' STA components {key}, polarity {pol}')
+    
+        ax[1].set_xlabel('time [s]')
+    
+        #plt.show()
+        fig.savefig(f'{fpout}/plots/components_v2/components_{key}.png')
+        plt.close()
+        
+        
+        data[unit] = {}
+        data[unit]['sta'] = sta
+        data[unit]['space_rf'] = space_rf
+        data[unit]['time_rf'] = time_rf
+        data[unit]['pol'] = pol
+        data[unit]['count'] = spike_count
+        data[unit]['nb_spks'] = nb_spks
+    
     except:
-        print(f'{unit} json file not found')
-        continue
-
-    data[unit] = {}
-    data[unit]['sta'] = sta
-    data[unit]['space_rf'] = space_rf
-    data[unit]['time_rf'] = time_rf
-    data[unit]['pol'] = pol
-    data[unit]['count'] = spike_count
-    data[unit]['nb_spks'] = nb_spks
-
+          print(f'{unit} json file not found')
+          continue
    
 
 
-
-with open(f'{fpout}/sta_data.pkl', "wb") as handle:   #Pickling
+with open(f'{fpout}/sta_data_v2.pkl', "wb") as handle:   #Pickling
     pickle.dump(data, handle,protocol=pickle.HIGHEST_PROTOCOL )
 
 
